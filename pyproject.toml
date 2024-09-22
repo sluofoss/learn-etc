@@ -2,7 +2,12 @@
 name = "alt-learn"
 version = "0.1.0"
 description = "Add your description here"
-dependencies = []
+dependencies = [
+    "duckdb>=1.1.0",
+    "polars>=1.7.1",
+    "scikit-learn>=1.5.2",
+    "pandas>=2.2.3",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
