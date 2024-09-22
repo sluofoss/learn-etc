@@ -12,14 +12,25 @@
 -e file:.
 duckdb==1.1.0
     # via alt-learn
+feature-engine==1.8.1
+    # via alt-learn
 joblib==1.4.2
     # via scikit-learn
 numpy==2.1.1
+    # via feature-engine
     # via pandas
+    # via patsy
     # via scikit-learn
     # via scipy
+    # via statsmodels
+packaging==24.1
+    # via statsmodels
 pandas==2.2.3
     # via alt-learn
+    # via feature-engine
+    # via statsmodels
+patsy==0.5.6
+    # via statsmodels
 polars==1.7.1
     # via alt-learn
 python-dateutil==2.9.0.post0
@@ -28,10 +39,16 @@ pytz==2024.2
     # via pandas
 scikit-learn==1.5.2
     # via alt-learn
+    # via feature-engine
 scipy==1.14.1
+    # via feature-engine
     # via scikit-learn
+    # via statsmodels
 six==1.16.0
+    # via patsy
     # via python-dateutil
+statsmodels==0.14.3
+    # via feature-engine
 threadpoolctl==3.5.0
     # via scikit-learn
 tzdata==2024.1
