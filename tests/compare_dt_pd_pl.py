@@ -35,12 +35,12 @@ def pdf():
         """)
     )
 
-def pdf2():
+def ohe():
     columns = "a, b, c"
     db = duckdb.connect()
     
     sql = f"""
-        create table tmp_data_store as
+        --create table tmp_data_store as
         with long_form as (
             unpivot x
             on {columns}
@@ -58,18 +58,18 @@ def pdf2():
         group by id
         order by id;
 
-        select * from tmp_data_store
+        --select * from tmp_data_store
     """
     
-    if True: # Enable to run sql statement-by-statement to workaround https://github.com/duckdb/duckdb/issues/13863
+    if False: # Enable to run sql statement-by-statement to workaround https://github.com/duckdb/duckdb/issues/13863
         print(sql)
         stmts = db.extract_statements(sql)
         print(stmts)
         for stmt in stmts[:-1]:
             print(stmt)
-            db.execute(stmt.query)
+            print(db.sql(stmt.query))
         sql = stmts[-1].query
     import time
-    time.sleep(2)
-    #print(db.execute(sql).df())
-pdf2()
+    #time.sleep(2)
+    print(db.execute(sql).df())
+ohe()

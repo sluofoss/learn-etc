@@ -10,7 +10,7 @@
 #   universal: false
 
 -e file:.
-duckdb==1.1.0
+duckdb==1.0.0
     # via alt-learn
 feature-engine==1.8.1
     # via alt-learn
