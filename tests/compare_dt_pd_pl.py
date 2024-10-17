@@ -14,7 +14,15 @@ x = pd.DataFrame({
 })
 #https://sekuel.com/sql-courses/duckdb-cookbook/correlation-matrix-duckdb/
 
-
+rows = 100_000
+kv = {
+    chr(i+65): list([str(x%i) for x in range(rows)]) 
+    #i: list([str(x%i) for x in range(rows)]),
+    #i: list([chr(x%26+65) for x in range(rows)]),
+    for i in range(2,23)
+}
+kv['id'] = list(range(rows))
+x = pd.DataFrame(kv)
 
 
 """
@@ -34,14 +42,32 @@ def pdf():
             order by id
         """)
     )
+def bprint(*args, **kwargs):
+    print("=================")
+    print(*args, **kwargs)
+    print("=================")
 
+from functools import wraps
+import time 
+def time_it(func):
+    @wraps(func)
+    def with_timing(*args, **kwargs):
+        s = time.time()
+        res = func(*args, **kwargs)
+        e = time.time()
+        bprint(e-s)
+        return res
+    return with_timing
+
+@time_it
 def ohe():
-    columns = "a, b, c"
+    columns = ','.join([c for c in x.columns if c != 'id'])
+    print(columns)
     db = duckdb.connect()
     
     sql = f"""
         --create table tmp_data_store as
-        with long_form as (
+        explain analyze with long_form as (
             unpivot x
             on {columns}
             into
@@ -54,7 +80,7 @@ def ohe():
         )
         pivot transformed_kv
         on kv 
-        using count(*)
+        using bool_or(id>0)
         group by id
         order by id;
 
@@ -69,7 +95,28 @@ def ohe():
             print(stmt)
             print(db.sql(stmt.query))
         sql = stmts[-1].query
-    import time
-    #time.sleep(2)
-    print(db.execute(sql).df())
+    memo_sql = "SELECT value AS memlimit FROM duckdb_settings() WHERE name = 'memory_limit';"
+    change_memo_sql = "SET memory_limit = '20GiB';"
+    change_memo_back_sql = "SET memory_limit = '12.1GiB';"
+    db.execute(change_memo_sql)
+    
+    print(db.execute(memo_sql).df())
+    
+    res = db.sql(sql).show(max_width=250)#.df()
+    #print(sorted(res.columns))
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(res)
+    
+    db.execute(change_memo_back_sql)
+
+    #with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    #    print(res)
+
 ohe()
+
+@time_it
+def ohe_pd():
+    res = pd.get_dummies(x.drop(columns = 'id'))
+    bprint(res.tail())
+ohe_pd()
+#https://stackoverflow.com/questions/68429779/is-there-a-way-to-make-get-dummies-work-faster

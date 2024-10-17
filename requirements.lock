@@ -10,20 +10,40 @@
 #   universal: false
 
 -e file:.
+alembic==1.13.3
+    # via optuna
+colorlog==6.8.2
+    # via optuna
 duckdb==1.0.0
     # via alt-learn
 feature-engine==1.8.1
     # via alt-learn
+greenlet==3.1.1
+    # via sqlalchemy
 joblib==1.4.2
     # via scikit-learn
+mako==1.3.5
+    # via alembic
+markupsafe==3.0.1
+    # via mako
+narwhals==1.9.4
+    # via alt-learn
 numpy==2.1.1
     # via feature-engine
+    # via optuna
     # via pandas
     # via patsy
+    # via pyarrow
     # via scikit-learn
     # via scipy
     # via statsmodels
+optuna==4.0.0
+    # via alt-learn
+    # via optuna-integration
+optuna-integration==4.0.0
+    # via alt-learn
 packaging==24.1
+    # via optuna
     # via statsmodels
 pandas==2.2.3
     # via alt-learn
@@ -33,10 +53,14 @@ patsy==0.5.6
     # via statsmodels
 polars==1.7.1
     # via alt-learn
+pyarrow==17.0.0
+    # via alt-learn
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.2
     # via pandas
+pyyaml==6.0.2
+    # via optuna
 scikit-learn==1.5.2
     # via alt-learn
     # via feature-engine
@@ -47,9 +71,17 @@ scipy==1.14.1
 six==1.16.0
     # via patsy
     # via python-dateutil
+sqlalchemy==2.0.36
+    # via alembic
+    # via optuna
 statsmodels==0.14.3
     # via feature-engine
 threadpoolctl==3.5.0
     # via scikit-learn
+tqdm==4.66.5
+    # via optuna
+typing-extensions==4.12.2
+    # via alembic
+    # via sqlalchemy
 tzdata==2024.1
     # via pandas
