@@ -1,4 +1,4 @@
-# alt-learn
+# learn-etc
 
 Describe your project here.
 
