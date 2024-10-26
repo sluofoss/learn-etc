@@ -10,7 +10,16 @@ lets see how sklearn onehot behaves on polars and pandas
 flowchart TD
     a[GridSearchCV:: hyperparameter search] --> b[cv: cross-validation generator:: split strategy, e.g. time series split]
 
-    aa[OptunaCV:: hyperparameter search] --> fit --> study --> optimize --> _objective --> cross_validate --> bb[cv: cross-validation generator:: split strategy, e.g. time series split]
+    aa[OptunaCV:: hyperparameter search] --> fit --> study --> optimize --> _objective 
+    
+    _objective --> cross_validate --> bb[cv: cross-validation generator:: split strategy, e.g. time series split] --> mean_score@{shape: doc, label: "mean_score"} --> self._store_scores
+
+    _objective --> self.cross_validate_with_pruning --> bb --> split_score@{shape : docs, label: "split_score"}  --> pruner_related --> self._store_scores
+
+    subgraph pruner_related
+      trial.report 
+      
+    end
 
     aaa[GridSearchCV] --> bbb[Pipeline] --> ccc[sampling ] --> classifier
 ```
