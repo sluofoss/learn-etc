@@ -12,16 +12,19 @@ flowchart TD
 
     aa[OptunaCV:: hyperparameter search] --> fit --> study --> optimize --> _objective 
     
-    _objective --> cross_validate --> bb[cv: cross-validation generator:: split strategy, e.g. time series split] --> mean_score@{shape: doc, label: "mean_score"} --> self._store_scores
+    subgraph _objective
+      cross_validate --> bb[cv: cross-validation generator:: split strategy, e.g. time series split] --> mean_score@{shape: doc, label: "mean_score"} --> self._store_scores
 
-    _objective --> self.cross_validate_with_pruning --> bb --> split_score@{shape : docs, label: "split_score"}  --> pruner_related --> self._store_scores
-
-    subgraph pruner_related
-      trial.report 
-      
+      self.cross_validate_with_pruning --> bb --> split_score@{shape : docs, label: "split_score"} --> pruner_related --> self._store_scores 
     end
 
+  
+    self._store_scores
+
     aaa[GridSearchCV] --> bbb[Pipeline] --> ccc[sampling ] --> classifier
+    subgraph pruner_related
+      trial.report
+    end
 ```
 
 # optuna search:
