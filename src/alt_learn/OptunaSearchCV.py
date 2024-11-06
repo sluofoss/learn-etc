@@ -262,12 +262,6 @@ class _Objective:
 
         self._store_scores(trial, scores)
 
-        print("----------------------------")
-        print("----------------------------")
-        print(scores)
-        print("----------------------------")
-
-        
         test_scores = scores["test_score"]
         scores_list = test_scores if isinstance(test_scores, list) else test_scores.tolist()
         try:
@@ -286,7 +280,10 @@ class _Objective:
         if is_classifier(estimator):
             partial_fit_params = self.fit_params.copy()
             y = self.y.values if isinstance(self.y, pd.Series) else self.y
-            classes = np.unique(y)
+            if y is not None:
+                classes = np.unique(y)
+            else:
+                classes = np.array([None])
 
             partial_fit_params.setdefault("classes", classes)
 
@@ -383,7 +380,7 @@ class _Objective:
 
     def _store_scores(self, trial: Trial, scores: Mapping[str, OneDimArrayLikeType]) -> None:
         for name, array in scores.items():
-            if name in ["test_score", "train_score"]:
+            if "test_" in name or "train_" in name:
                 for i, score in enumerate(array):
                     trial.set_user_attr("split{}_{}".format(i, name), score)
 
@@ -624,8 +621,9 @@ class OptunaSearchCV(BaseEstimator):
 
         return self.study_.user_attrs
 
-    @property
-    def decision_function(self) -> Callable[..., OneDimArrayLikeType | TwoDimArrayLikeType]:
+    def decision_function(
+        self, X: TwoDimArrayLikeType, **kwargs: Any
+    ) -> OneDimArrayLikeType | TwoDimArrayLikeType:
         """Call ``decision_function`` on the best estimator.
 
         This is available only if the underlying estimator supports
@@ -634,7 +632,7 @@ class OptunaSearchCV(BaseEstimator):
 
         self._check_is_fitted()
 
-        return self.best_estimator_.decision_function
+        return self.best_estimator_.decision_function(X, **kwargs)
 
     @property
     def inverse_transform(self) -> Callable[..., TwoDimArrayLikeType]:
@@ -648,8 +646,9 @@ class OptunaSearchCV(BaseEstimator):
 
         return self.best_estimator_.inverse_transform
 
-    @property
-    def predict(self) -> Callable[..., OneDimArrayLikeType | TwoDimArrayLikeType]:
+    def predict(
+        self, X: TwoDimArrayLikeType, **kwargs: Any
+    ) -> OneDimArrayLikeType | TwoDimArrayLikeType:
         """Call ``predict`` on the best estimator.
 
         This is available only if the underlying estimator supports ``predict``
@@ -658,10 +657,9 @@ class OptunaSearchCV(BaseEstimator):
 
         self._check_is_fitted()
 
-        return self.best_estimator_.predict
+        return self.best_estimator_.predict(X, **kwargs)
 
-    @property
-    def predict_log_proba(self) -> Callable[..., TwoDimArrayLikeType]:
+    def predict_log_proba(self, X: TwoDimArrayLikeType, **kwargs: Any) -> TwoDimArrayLikeType:
         """Call ``predict_log_proba`` on the best estimator.
 
         This is available only if the underlying estimator supports
@@ -670,10 +668,9 @@ class OptunaSearchCV(BaseEstimator):
 
         self._check_is_fitted()
 
-        return self.best_estimator_.predict_log_proba
+        return self.best_estimator_.predict_log_proba(X, **kwargs)
 
-    @property
-    def predict_proba(self) -> Callable[..., TwoDimArrayLikeType]:
+    def predict_proba(self, X: TwoDimArrayLikeType, **kwargs: Any) -> TwoDimArrayLikeType:
         """Call ``predict_proba`` on the best estimator.
 
         This is available only if the underlying estimator supports
@@ -682,7 +679,7 @@ class OptunaSearchCV(BaseEstimator):
 
         self._check_is_fitted()
 
-        return self.best_estimator_.predict_proba
+        return self.best_estimator_.predict_proba(X, **kwargs)
 
     @property
     def score_samples(self) -> Callable[..., OneDimArrayLikeType]:
@@ -738,7 +735,7 @@ class OptunaSearchCV(BaseEstimator):
         random_state: int | np.random.RandomState | None = None,
         refit: bool = True,
         return_train_score: bool = False,
-        scoring: Callable[..., float] | str | None = None,
+        scoring: Callable[..., float] | str | list | tuple | dict | None = None,
         study: study_module.Study | None = None,
         subsample: float | int = 1.0,
         timeout: float | None = None,
@@ -748,8 +745,8 @@ class OptunaSearchCV(BaseEstimator):
     ) -> None:
         _imports.check()
 
-        if not isinstance(param_distributions, dict):
-            raise TypeError("param_distributions must be a dictionary.")
+        if not isinstance(param_distributions, Mapping):
+            raise TypeError("param_distributions must be a mapping.")
 
         # Rejecting deprecated distributions as they may cause cryptic error
         # when cloning OptunaSearchCV instance.
@@ -769,7 +766,11 @@ class OptunaSearchCV(BaseEstimator):
         self.max_iter = max_iter
         self.n_trials = n_trials
         self.n_jobs = n_jobs if n_jobs else 1
-        self.param_distributions = param_distributions
+        self.param_distributions = (
+            param_distributions
+            if isinstance(param_distributions, dict)
+            else dict(param_distributions)
+        )
         self.random_state = random_state
         self.refit = refit
         self.return_train_score = return_train_score
